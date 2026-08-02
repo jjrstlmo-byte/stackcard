@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Stack Card" />
+<meta name="theme-color" content="#0d3b2c" />
+<title>Tournament Stack Card</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%230d3b2c'/%3E%3Ccircle cx='90' cy='90' r='58' fill='none' stroke='%23C6A04A' stroke-width='10' stroke-dasharray='18 14'/%3E%3Ctext x='90' y='108' font-size='58' font-family='Georgia' fill='%23F4EFE1' text-anchor='middle'%3EBB%3C/text%3E%3C/svg%3E" />
+<style>
+  :root{
+    --mono: ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,'Times New Roman',serif;
+    --ivory:#F4EFE1; --ink:#211A12; --muted:#6B6152; --gold:#C6A04A;
+    --deep:#2E7D53; --mid:#B8860B; --short:#B23A2E; --blue:#2F6E8F; --felt:#0d3b2c;
+  }
+  *{box-sizing:border-box;-webkit-text-size-adjust:100%;}
+  body{
+    margin:0; color:var(--ink); font-family:var(--mono);
+    background:radial-gradient(120% 90% at 50% 0%, #14523d 0%, #0d3b2c 55%, #082a20 100%);
+    background-attachment:fixed; padding:20px 12px 40px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  .display{font-family:var(--serif);}
+  .tnum{font-variant-numeric:tabular-nums;}
+  .card{background:var(--ivory);border:1px solid var(--gold);border-radius:14px;
+    box-shadow:0 18px 50px rgba(0,0,0,.45);padding:20px 20px 18px;}
+  .panel{background:rgba(244,239,225,.96);border-radius:12px;padding:16px 18px;margin-top:16px;}
+  h2.sec{font-family:var(--serif);font-weight:700;font-size:16px;margin:0;}
+  .eyebrow{font-size:10px;letter-spacing:3px;color:#8A6D2F;font-weight:700;}
+  .title{font-family:var(--serif);font-size:26px;font-weight:700;line-height:1.05;margin-top:2px;}
+  .hdr{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid var(--gold);
+    padding-bottom:10px;margin-bottom:12px;gap:8px;flex-wrap:wrap;}
+  .meta{font-size:11px;text-align:right;color:#5c5344;line-height:1.5;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{font-size:10.5px;font-weight:700;letter-spacing:.4px;color:var(--muted);padding:4px 8px;text-align:right;white-space:nowrap;}
+  th.l,td.l{text-align:left;}
+  td{padding:5px 8px;text-align:right;white-space:nowrap;}
+  tbody tr{border-top:1px solid #E4DCC7;}
+  .tag{display:inline-block;font-size:10px;font-weight:700;color:#fff;border-radius:4px;padding:2px 6px;white-space:nowrap;}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:#5c5344;}
+  .legend span.dot{width:11px;height:11px;border-radius:3px;display:inline-block;}
+  .legend .item{display:inline-flex;align-items:center;gap:6px;}
+  .note{font-size:10.5px;color:#8A7C5E;margin-top:8px;line-height:1.4;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:12px;}
+  label.f{display:block;}
+  label.f .lab{font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:500;}
+  input,select{width:100%;padding:8px 9px;border-radius:8px;border:1px solid #C9BFA4;background:#fff;
+    font-family:var(--mono);font-size:14px;}
+  .row{display:flex;gap:6px;flex-wrap:wrap;}
+  button.tg{border:1px solid #C9BFA4;background:#fff;color:#5c5344;border-radius:7px;padding:6px 12px;
+    font-size:12px;font-weight:700;cursor:pointer;font-family:var(--mono);}
+  button.tg.on{background:var(--felt);color:var(--ivory);}
+  button.print{background:var(--felt);color:var(--ivory);border:1px solid var(--gold);border-radius:8px;
+    padding:9px 15px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--mono);}
+  .flexbtw{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+  .tip{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4;}
+  .verdict{margin-top:12px;padding-left:12px;border-left:4px solid var(--muted);}
+  .verdict .big{font-size:22px;font-weight:700;}
+  .verdict .sub{font-size:12px;color:#5c5344;margin-top:2px;}
+  .verdict .adv{font-size:13px;margin-top:6px;font-weight:500;}
+  .foot{color:#cfe6d9;font-size:11px;margin-top:16px;line-height:1.5;text-align:center;}
+  svg{display:block;width:100%;height:auto;}
+  @media print{
+    .no-print{display:none !important;}
+    body{background:#fff !important;padding:0 !important;}
+    .card{box-shadow:none !important;border:1.5px solid var(--ink) !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= THE CARD (prints) ================= -->
+  <div class="card">
+    <div class="hdr">
+      <div>
+        <div class="eyebrow">WHERE DO I STAND</div>
+        <div class="title">Tournament Stack Card</div>
+      </div>
+      <div class="meta tnum" id="meta"></div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="tnum">
+        <thead>
+          <tr>
+            <th class="l">Lvl</th>
+            <th class="l">Blinds (SB / BB)</th>
+            <th>Left</th>
+            <th>Avg stack</th>
+            <th>Avg BB</th>
+            <th style="width:82px;">Zone</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div class="legend">
+      <span class="item"><span class="dot" style="background:var(--deep)"></span>Deep · 40+ BB · post-flop poker</span>
+      <span class="item"><span class="dot" style="background:var(--mid)"></span>Playable · 20–40 BB · steal &amp; 3-bet</span>
+      <span class="item"><span class="dot" style="background:var(--short)"></span>Push/fold · under 20 BB</span>
+    </div>
+    <div class="note">Read your live level, compare your stack to <b>Avg stack</b>, and read your depth off
+      <b>Avg BB</b>. Above the average = healthy; below it, tighten your spots and hunt fold-equity.</div>
+  </div>
+
+  <!-- ================= CONTROLS ================= -->
+  <div class="panel no-print">
+    <div class="flexbtw">
+      <h2 class="sec">Adjust the model</h2>
+      <button class="print" onclick="window.print()">Print / save card</button>
+    </div>
+
+    <div class="row" style="margin-top:12px;">
+      <button class="tg on" id="modeModel">Model → final table</button>
+      <button class="tg" id="modeAnchor">Calibrate to a live count</button>
+    </div>
+
+    <div class="grid">
+      <label class="f"><div class="lab">Starting chips</div>
+        <input id="startingStack" type="number" inputmode="numeric" value="10000" min="100" step="100"></label>
+      <label class="f" id="fEntrants"><div class="lab">Total entrants</div>
+        <input id="entrants" type="number" inputmode="numeric" value="100" min="2"></label>
+
+      <label class="f" id="fEndPlayers"><div class="lab">Players left at level 20</div>
+        <input id="endPlayers" type="number" inputmode="numeric" value="9" min="2"></label>
+
+      <label class="f" id="fAnchorLevel" style="display:none;"><div class="lab">At blind level…</div>
+        <select id="anchorLevel"></select></label>
+      <label class="f" id="fAnchorLeft" style="display:none;"><div class="lab">…remaining entrants</div>
+        <input id="anchorLeft" type="number" inputmode="numeric" value="30" min="2"></label>
+
+      <label class="f"><div class="lab">Starting depth (BB at level 1)</div>
+        <input id="startBB" type="number" inputmode="numeric" value="100" min="10"></label>
+      <label class="f"><div class="lab" id="growthLabel">Blind growth / level: 1.22×</div>
+        <input id="growth" type="range" min="1.1" max="1.6" step="0.01" value="1.22"></label>
+    </div>
+    <div class="tip" id="modelFeedback"></div>
+  </div>
+
+  <!-- ================= CHART ================= -->
+  <div class="panel no-print">
+    <div class="flexbtw">
+      <h2 class="sec">Average stack across the tournament</h2>
+      <div class="row">
+        <button class="tg on" id="metricBB">Big blinds</button>
+        <button class="tg" id="metricChips">Chips</button>
+      </div>
+    </div>
+    <div id="chart" style="margin-top:8px;"></div>
+  </div>
+
+  <!-- ================= WHERE DO I STAND ================= -->
+  <div class="panel no-print">
+    <h2 class="sec">Where do I stand right now?</h2>
+    <div class="row" style="margin:12px 0;">
+      <button class="tg on" id="payStandard">Standard payout</button>
+      <button class="tg" id="paySurvivor">Survivor / flat</button>
+    </div>
+    <div class="grid" style="margin-top:0;">
+      <label class="f"><div class="lab">My chip stack</div>
+        <input id="myStack" type="number" inputmode="numeric" placeholder="e.g. 24000"></label>
+      <label class="f"><div class="lab">Current level</div>
+        <select id="myLevel"></select></label>
+
+      <label class="f" id="fLiveRemaining" style="display:none;"><div class="lab">Players left now</div>
+        <input id="liveRemaining" type="number" inputmode="numeric" value="30" min="1"></label>
+      <label class="f" id="fPaidSpots" style="display:none;"><div class="lab">Paid spots (#)</div>
+        <input id="paidSpots" type="number" inputmode="numeric" value="15" min="1"></label>
+      <label class="f" id="fPaidPct" style="display:none;"><div class="lab">…or % paid</div>
+        <input id="paidPct" type="number" inputmode="numeric" value="15" min="1" max="100"></label>
+    </div>
+    <div id="verdict"></div>
+  </div>
+
+  <div class="foot no-print" id="foot"></div>
+</div>
+
+<script>
+(function(){
+  var LEVELS = 20;
+  var state = { attritionMode:"model", metric:"bb", payoutMode:"standard" };
+
+  function niceBlind(x){
+    if(x<=2) return 2;
+    var mag = Math.pow(10, Math.floor(Math.log10(x))-1);
+    var v = Math.round(x/mag)*mag;
+    if(v % 2 !== 0) v += 1;
+    return v;
+  }
+  function survivalRate(c){
+    if(state.attritionMode==="anchor"){
+      var aL = Math.min(Math.max(2,c.anchorLevel),LEVELS);
+      var aLeft = Math.min(Math.max(1,c.anchorLeft),c.entrants);
+      return Math.pow(aLeft/c.entrants, 1/(aL-1));
+    }
+    return Math.pow(Math.max(1,c.endPlayers)/c.entrants, 1/(LEVELS-1));
+  }
+  function buildTable(c){
+    var totalChips = c.entrants*c.startingStack;
+    var bb1 = c.startingStack/c.startBB;
+    var r = survivalRate(c);
+    var anchorL = Math.min(Math.max(2,c.anchorLevel),LEVELS);
+    var rows=[], prevBB=0, prevLeft=c.entrants;
+    for(var L=1;L<=LEVELS;L++){
+      var bb = niceBlind(bb1*Math.pow(c.growth,L-1));
+      if(bb<=prevBB){ var step=Math.pow(10,Math.floor(Math.log10(prevBB))-1)*2; bb=prevBB+step; }
+      prevBB=bb;
+      var left;
+      if(L===1) left=c.entrants;
+      else if(state.attritionMode==="anchor" && L===anchorL) left=Math.min(Math.max(1,c.anchorLeft),c.entrants);
+      else left=Math.round(c.entrants*Math.pow(r,L-1));
+      left=Math.min(left,prevLeft); left=Math.max(left,2); prevLeft=left;
+      var avgChips=totalChips/left, avgBB=avgChips/bb;
+      rows.push({level:L,sb:bb/2,bb:bb,left:left,avgChips:avgChips,avgBB:avgBB});
+    }
+    return rows;
+  }
+  function zone(bb){
+    if(bb>=40) return {label:"Deep",color:"#2E7D53"};
+    if(bb>=20) return {label:"Playable",color:"#B8860B"};
+    return {label:"Push / fold",color:"#B23A2E"};
+  }
+  function fmt(n){ return Math.round(n).toLocaleString("en-US"); }
+  function g(id){ return document.getElementById(id); }
+  function num(id, def, min, max){
+    var v = parseFloat(g(id).value);
+    if(!isFinite(v)) v = def;
+    if(min!=null) v=Math.max(min,v);
+    if(max!=null) v=Math.min(max,v);
+    return v;
+  }
+
+  function cfg(){
+    var entrants = Math.max(2, Math.round(num("entrants",100,2)));
+    return {
+      startingStack: Math.max(100, num("startingStack",10000,100)),
+      entrants: entrants,
+      endPlayers: Math.min(entrants, Math.max(2, Math.round(num("endPlayers",9,2)))),
+      growth: num("growth",1.22,1.1,1.6),
+      startBB: Math.max(10, num("startBB",100,10)),
+      anchorLevel: Math.round(num("anchorLevel",10,2,LEVELS)),
+      anchorLeft: Math.min(entrants, Math.max(2, Math.round(num("anchorLeft",30,2))))
+    };
+  }
+
+  function drawChart(rows,c){
+    var W=680,H=260,padL=52,padR=16,padT=12,padB=34;
+    var vals = rows.map(function(r){ return state.metric==="chips"?r.avgChips:r.avgBB; });
+    var maxV = Math.max.apply(null, vals);
+    var refA = state.metric==="chips"? c.startingStack : c.startBB;
+    maxV = Math.max(maxV, refA)*1.08;
+    var minV = 0;
+    function X(l){ return padL + (l-1)/(LEVELS-1)*(W-padL-padR); }
+    function Y(v){ return padT + (1-(v-minV)/(maxV-minV))*(H-padT-padB); }
+    var pts = rows.map(function(r,i){ return X(r.level)+","+Y(vals[i]); }).join(" ");
+    var s = '<svg viewBox="0 0 '+W+' '+H+'" font-family="'+"var(--mono)"+'">';
+    // y gridlines + labels (4)
+    for(var t=0;t<=4;t++){
+      var vv=minV+(maxV-minV)*t/4, yy=Y(vv);
+      s+='<line x1="'+padL+'" y1="'+yy+'" x2="'+(W-padR)+'" y2="'+yy+'" stroke="#E0D8C2" stroke-dasharray="3 3"/>';
+      var lab = state.metric==="chips"? Math.round(vv/1000)+"k" : Math.round(vv);
+      s+='<text x="'+(padL-6)+'" y="'+(yy+3)+'" font-size="10" fill="#6B6152" text-anchor="end">'+lab+'</text>';
+    }
+    // x labels
+    for(var L=1;L<=LEVELS;L++){
+      if(L===1||L%2===0){
+        s+='<text x="'+X(L)+'" y="'+(H-padB+16)+'" font-size="10" fill="#6B6152" text-anchor="middle">'+L+'</text>';
+      }
+    }
+    s+='<text x="'+((padL+W-padR)/2)+'" y="'+(H-2)+'" font-size="11" fill="#6B6152" text-anchor="middle">Blind level</text>';
+    // reference lines
+    var yRef=Y(refA);
+    s+='<line x1="'+padL+'" y1="'+yRef+'" x2="'+(W-padR)+'" y2="'+yRef+'" stroke="#2F6E8F" stroke-dasharray="5 4"/>';
+    s+='<text x="'+(W-padR)+'" y="'+(yRef-4)+'" font-size="10" fill="#2F6E8F" text-anchor="end">'+(state.metric==="chips"?"start":"start "+c.startBB+"BB")+'</text>';
+    if(state.metric==="bb" && 20<=maxV){
+      var y20=Y(20);
+      s+='<line x1="'+padL+'" y1="'+y20+'" x2="'+(W-padR)+'" y2="'+y20+'" stroke="#B23A2E" stroke-dasharray="5 4"/>';
+      s+='<text x="'+(W-padR)+'" y="'+(y20+13)+'" font-size="10" fill="#B23A2E" text-anchor="end">push/fold</text>';
+    }
+    // series
+    s+='<polyline points="'+pts+'" fill="none" stroke="#B23A2E" stroke-width="2.5"/>';
+    rows.forEach(function(r,i){ s+='<circle cx="'+X(r.level)+'" cy="'+Y(vals[i])+'" r="2.6" fill="#B23A2E"/>'; });
+    s+='</svg>';
+    g("chart").innerHTML=s;
+  }
+
+  function survivorVerdict(c, me){
+    var left = Math.max(1, Math.round(num("liveRemaining",30,1)));
+    var paidSpots = Math.max(1, Math.min(c.entrants, Math.round(num("paidSpots",15,1))));
+    var paidPct = c.entrants>0 ? paidSpots/c.entrants*100 : 0;
+    var toBust = left - paidSpots;
+    var phase,advice,color;
+    if(toBust<=0){ phase="In the money"; color="#2E7D53";
+      advice="Locked. Every paid seat earns the same — there is no ladder left to climb, so stop taking risks. Chips past survival are worthless."; }
+    else if(toBust<=3){ phase="Hard bubble — "+toBust+" to burst"; color="#B23A2E";
+      advice="Maximum ICM pressure. Fold everything but the nuts; never put your tournament life in. Let the short stacks bust. Only add chips when it folds to you uncontested. Ignore your BB count — survival is the only metric."; }
+    else if(toBust<=Math.max(10,paidSpots*0.5)){ phase="Nearing the money — "+toBust+" to go"; color="#B8860B";
+      advice="Flat payout means survival beats chips well before the bubble. Tighten hard, dodge marginal all-ins, and pick only on stacks shorter than you. Don't gamble to build a stack you can't cash."; }
+    else { phase=toBust+" from the money"; color="#2F6E8F";
+      advice="Still far from the bubble. Play a normal short-stack accumulation game, but keep watching the count — the fold-it-down zone arrives fast in a survivor."; }
+    var sub = left+" left · top "+paidSpots+" paid ("+paidPct.toFixed(0)+"%)"+
+      (toBust>0? " · "+toBust+" more must bust" : " · you're already in")+
+      (me? " · you hold "+me.bb.toFixed(1)+" BB":"");
+    return '<div class="verdict" style="border-left-color:'+color+'">'+
+      '<div class="big tnum" style="font-size:20px;color:'+color+'">'+phase+'</div>'+
+      '<div class="sub tnum">'+sub+'</div>'+
+      '<div class="adv">'+advice+'</div></div>';
+  }
+
+  function standardVerdict(me){
+    if(!me) return "";
+    var z=zone(me.bb);
+    return '<div class="verdict" style="border-left-color:'+z.color+'">'+
+      '<div class="big tnum">'+me.bb.toFixed(1)+' BB <span style="font-size:13px;font-weight:500;color:#6B6152">('+z.label+')</span></div>'+
+      '<div class="sub tnum">'+me.rel+' of '+fmt(me.row.avgChips)+' — you\'re at '+Math.round(me.ratio*100)+'% of the room\'s average.</div>'+
+      '<div class="adv">'+me.stance+'</div></div>';
+  }
+
+  function computeMe(rows){
+    var s = parseFloat(g("myStack").value);
+    if(!isFinite(s)||s<=0) return null;
+    var lvl = parseInt(g("myLevel").value,10)||1;
+    var row = rows.filter(function(r){return r.level===lvl;})[0]||rows[0];
+    var bb=s/row.bb, ratio=s/row.avgChips, stance, rel;
+    if(bb<=10) stance="Shove or fold. Find the first decent hand and get it in.";
+    else if(bb<=20) stance="Short. Re-steal / shove range; avoid limping into trouble.";
+    else if(bb<=35) stance="Working stack. Steal, 3-bet light, keep folding equity.";
+    else stance="Room to play post-flop. Pick spots, avoid coin flips for stacks.";
+    if(ratio>=1.3) rel="Well above the average stack";
+    else if(ratio>=1.0) rel="Above the average stack";
+    else if(ratio>=0.7) rel="Below the average stack";
+    else rel="Well below the average stack";
+    return {bb:bb,ratio:ratio,stance:stance,rel:rel,row:row};
+  }
+
+  function fillSelectPreserve(sel, rows){
+    var cur = sel.value;
+    var html = rows.map(function(r){ return '<option value="'+r.level+'">'+r.level+' — '+fmt(r.sb)+'/'+fmt(r.bb)+'</option>'; }).join("");
+    sel.innerHTML = html;
+    if(cur) sel.value = cur;
+    if(!sel.value) sel.value = rows[0].level;
+  }
+  function fillAnchorLevels(sel){
+    if(sel.options.length) return;
+    var h="";
+    for(var n=2;n<=LEVELS;n++) h+='<option value="'+n+'">Level '+n+'</option>';
+    sel.innerHTML=h; sel.value=10;
+  }
+
+  function render(){
+    var c = cfg();
+    var rows = buildTable(c);
+
+    // meta
+    var meta = fmt(c.startingStack)+" start · "+c.entrants+" entrants<br>"+LEVELS+" levels · avg = total chips ÷ players left";
+    if(state.payoutMode==="survivor"){
+      var ps = Math.max(1,Math.min(c.entrants,Math.round(num("paidSpots",15,1))));
+      meta += '<br><span style="color:#B23A2E;font-weight:700">Survivor · pays top '+ps+' ('+(ps/c.entrants*100).toFixed(0)+'%)</span>';
+    }
+    g("meta").innerHTML = meta;
+
+    // table
+    var tb="";
+    rows.forEach(function(r){
+      var z=zone(r.avgBB);
+      tb+='<tr><td class="l" style="font-weight:700">'+r.level+'</td>'+
+        '<td class="l">'+fmt(r.sb)+' / '+fmt(r.bb)+'</td>'+
+        '<td>'+r.left+'</td>'+
+        '<td style="font-weight:500">'+fmt(r.avgChips)+'</td>'+
+        '<td style="font-weight:700">'+r.avgBB.toFixed(1)+'</td>'+
+        '<td style="padding-right:0"><span class="tag" style="background:'+z.color+'">'+z.label+'</span></td></tr>';
+    });
+    g("tableBody").innerHTML=tb;
+
+    // growth label + model feedback
+    g("growthLabel").textContent = "Blind growth / level: "+c.growth.toFixed(2)+"×";
+    var surv = survivalRate(c), bustPct=(1-surv)*100, projEnd=rows[rows.length-1].left;
+    if(state.attritionMode==="anchor"){
+      g("modelFeedback").innerHTML = "Anchored to your read: that pace is ≈ <b>"+bustPct.toFixed(0)+
+        "% busting per level</b>, projecting <b>~"+projEnd+" left by level 20</b>. Drop in a live count mid-event and every row re-fits to it.";
+    } else {
+      g("modelFeedback").innerHTML = "Tip: the <b>Avg BB</b> column doesn't move when you change the starting chips — depth is buy-in-invariant once the blinds scale with the stack. Slower growth keeps the final table deep; faster growth is turbo-shallow.";
+    }
+
+    // selects
+    fillSelectPreserve(g("myLevel"), rows);
+    fillAnchorLevels(g("anchorLevel"));
+
+    // chart
+    drawChart(rows,c);
+
+    // verdict
+    var me = computeMe(rows);
+    if(state.payoutMode==="survivor"){ g("verdict").innerHTML = survivorVerdict(c, me); }
+    else { g("verdict").innerHTML = standardVerdict(me); }
+
+    // foot
+    var danger = rows.filter(function(r){return r.avgBB<20;})[0];
+    g("foot").innerHTML = "Idealized model: smooth exponential attrition and a clean geometric blind ladder. Real fields bust in lumps (bubble, breaks) and clocks aren't perfectly geometric — tune the knobs to your event's structure sheet."+
+      (danger? " In this setup the average stack drops under 20 BB around level "+danger.level+".":"");
+  }
+
+  // ---- wire up ----
+  function normalizeOnChange(id, min, max, round){
+    var el=g(id);
+    el.addEventListener("change", function(){
+      var v=parseFloat(el.value);
+      if(!isFinite(v)) v = min!=null?min:0;
+      if(round) v=Math.round(v);
+      if(min!=null) v=Math.max(min,v);
+      if(max!=null) v=Math.min(max,v);
+      el.value=v; render();
+    });
+  }
+  ["startingStack","entrants","endPlayers","startBB","anchorLeft","liveRemaining","paidSpots","paidPct","myStack"]
+    .forEach(function(id){ g(id).addEventListener("input", render); });
+  g("growth").addEventListener("input", render);
+  g("anchorLevel").addEventListener("change", render);
+  g("myLevel").addEventListener("change", render);
+
+  normalizeOnChange("startingStack",100,null,false);
+  normalizeOnChange("entrants",2,null,true);
+  normalizeOnChange("endPlayers",2,null,true);
+  normalizeOnChange("startBB",10,null,true);
+  normalizeOnChange("anchorLeft",2,null,true);
+  normalizeOnChange("liveRemaining",1,null,true);
+  normalizeOnChange("paidSpots",1,null,true);
+
+  // % paid <-> paid spots two-way
+  g("paidSpots").addEventListener("change", function(){
+    var ent=Math.max(2,Math.round(num("entrants",100,2)));
+    var ps=Math.max(1,Math.min(ent,Math.round(num("paidSpots",15,1))));
+    g("paidSpots").value=ps; g("paidPct").value=Math.round(ps/ent*100); render();
+  });
+  g("paidPct").addEventListener("change", function(){
+    var ent=Math.max(2,Math.round(num("entrants",100,2)));
+    var p=Math.min(100,Math.max(1,Math.round(num("paidPct",15,1))));
+    var ps=Math.max(1,Math.round(ent*p/100));
+    g("paidPct").value=p; g("paidSpots").value=ps; render();
+  });
+
+  function setMode(m){
+    state.attritionMode=m;
+    g("modeModel").classList.toggle("on",m==="model");
+    g("modeAnchor").classList.toggle("on",m==="anchor");
+    g("fEntrants").style.display = "";
+    g("fEndPlayers").style.display = m==="model"?"":"none";
+    g("fAnchorLevel").style.display = m==="anchor"?"":"none";
+    g("fAnchorLeft").style.display = m==="anchor"?"":"none";
+    render();
+  }
+  g("modeModel").onclick=function(){setMode("model");};
+  g("modeAnchor").onclick=function(){setMode("anchor");};
+
+  function setMetric(m){
+    state.metric=m;
+    g("metricBB").classList.toggle("on",m==="bb");
+    g("metricChips").classList.toggle("on",m==="chips");
+    render();
+  }
+  g("metricBB").onclick=function(){setMetric("bb");};
+  g("metricChips").onclick=function(){setMetric("chips");};
+
+  function setPayout(p){
+    state.payoutMode=p;
+    g("payStandard").classList.toggle("on",p==="standard");
+    g("paySurvivor").classList.toggle("on",p==="survivor");
+    var show = p==="survivor"?"":"none";
+    g("fLiveRemaining").style.display=show;
+    g("fPaidSpots").style.display=show;
+    g("fPaidPct").style.display=show;
+    render();
+  }
+  g("payStandard").onclick=function(){setPayout("standard");};
+  g("paySurvivor").onclick=function(){setPayout("survivor");};
+
+  render();
+})();
+</script>
+</body>
+</html>
